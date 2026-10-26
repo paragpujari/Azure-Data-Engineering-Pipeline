@@ -1,0 +1,73 @@
+{
+  "name": "PL_RetailSales_CopyToBronze",
+  "properties": {
+    "parameters": {
+      "sourceFileName": {
+        "type": "String",
+        "defaultValue": "retail_sales.csv"
+      },
+      "loadDate": {
+        "type": "String",
+        "defaultValue": "2026-01-01"
+      }
+    },
+    "activities": [
+      {
+        "name": "CopyRetailSalesToBronze",
+        "type": "Copy",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "source": {
+            "type": "DelimitedTextSource",
+            "storeSettings": {
+              "type": "FileServerReadSettings",
+              "recursive": false
+            }
+          },
+          "sink": {
+            "type": "DelimitedTextSink",
+            "storeSettings": {
+              "type": "AzureBlobFSWriteSettings"
+            }
+          },
+          "enableStaging": false
+        },
+        "inputs": [
+          {
+            "referenceName": "DS_RetailSales_Source",
+            "type": "DatasetReference",
+            "parameters": {
+              "fileName": {
+                "value": "@pipeline().parameters.sourceFileName",
+                "type": "Expression"
+              }
+            }
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "DS_RetailSales_Bronze",
+            "type": "DatasetReference",
+            "parameters": {
+              "folderPath": {
+                "value": "@concat('retail_sales/load_date=', pipeline().parameters.loadDate)",
+                "type": "Expression"
+              },
+              "fileName": {
+                "value": "@pipeline().parameters.sourceFileName",
+                "type": "Expression"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
